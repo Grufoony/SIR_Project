@@ -1,0 +1,211 @@
+#ifndef DISEASE_HPP
+#define DISEASE_HPP
+
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <string>
+#include <SFML/Graphics.hpp>
+
+int constexpr EDGE = 20;
+
+struct State {
+    double s;
+    double i;
+    double r;
+    
+    State(double sus, double inf, double rec) : s{sus}, i{inf}, r{rec} {};
+};
+
+class Disease {
+    private:
+
+    std::string name_;
+    std::vector<State> state_;
+    double tot_;
+    double gamma_;
+    double beta_;
+
+    auto evolve_(State const& begin) {
+        State end(0., 0., 0.);
+
+        //La funzione dei suscettibili è sempre decrescente, mi limito a metterla uguale a 0 quando, per errori di approssimazione, risulta <0
+
+        end.s = begin.s - beta_*begin.i*begin.s;
+        if(end.s < 0) {
+            end.s = 0;
+        }
+
+        //Calcolo prima i recoverd in quanto sono sicuro non sforino (al massimo se gamma = 1 diventano gli infetti)
+        
+        end.r = begin.r + gamma_*begin.i;
+        if(end.r > tot_) {
+            end.r = tot_;
+        }
+
+        //Gli infetti calcolati in esubero risultano semplicemente I = N - S - R
+
+        end.i = begin.i + beta_*begin.i*begin.s - gamma_*begin.i;
+        if(end.i > tot_) {
+            end.i = tot_ - end.r - end.s;
+        }
+        //Verificare che s+i+r=n
+
+        return end;
+    };
+
+    public:
+
+    Disease(std::string p, int n, double  b, double y): name_{p} {
+        //Verifico che i dati inseriti siano coerenti
+        assert(b > 0 && b < 1);
+        assert(y > 0 && y < 1);
+        assert(n > 1); //Non ha senso un modello con una persona sola (in generale con poche, ma come definire "poche"?)
+        
+        tot_ = n;
+        beta_ = b/tot_;
+        gamma_ = y;
+        State state_0{(double)n - 1., 1., 0.};
+        state_.push_back(state_0);
+    }
+
+    //Funzione per cambiare il valore di beta
+    void setBeta(double& b) {
+        beta_ = b;
+    }
+
+    //Funzione per cambiare il valore di gamma
+    void setGamma(double& g) {
+        gamma_ = g;
+    }
+
+    //Evolvo la malattia per n giorni
+    void evolve(int& n) {
+        for(int i = 0; i < n; ++i) {
+            state_.push_back(evolve_(state_[i]));
+        }
+    }
+
+    //Stampo un report di tutti i giorni (calcolati)
+    void print() {
+        int i = 0;
+        auto tab = std::setw(20);
+
+        std::cout << name_ << '\n';
+        std::cout << "Current value of R0: " << (tot_*beta_)/gamma_ << '\n';      
+        std::cout << tab << "Day" << tab << "Susceptible" << tab << "Infectuos"<< tab << "Recovered" << '\n';
+        for(auto const it : state_) {
+            std::cout << std::setprecision(10) << tab << i << tab << (int)it.s << tab << (int)it.i << tab << (int)it.r << '\n';
+            ++i;
+        }
+    }
+
+    //Stampa su file un report di tutti i giorni (calcolati)
+    void f_print() {
+
+        //Sposto l'output su file
+        std::ofstream fp;
+        fp.open("report.txt");
+        std::cout.rdbuf(fp.rdbuf());
+
+        print();
+        fp.close();
+    }
+
+    //Disegan il grafico
+    void draw(int lenght, int height, const char& c) {
+        sf::RenderWindow window(sf::VideoMode(lenght, height), name_, sf::Style::Close | sf::Style::Resize);
+        window.setVerticalSyncEnabled(true);
+        sf::RectangleShape x_axis(sf::Vector2f(lenght, 1));
+        sf::RectangleShape y_axis(sf::Vector2f(1, height));
+        x_axis.setPosition(0, height-EDGE);
+        y_axis.setPosition(EDGE,0);
+        x_axis.setFillColor(sf::Color::Black);
+        y_axis.setFillColor(sf::Color::Black);
+
+        //Settiamo ora le variabili per mettere tutto in "scala"
+        auto x_up = (lenght - EDGE) / state_.size();
+        auto y_scale = (height - 2*EDGE) / tot_;
+
+        sf::RectangleShape bit(sf::Vector2f(2., 2.));
+
+        while(window.isOpen()) {
+            window.clear(sf::Color::White);
+            window.draw(x_axis);
+            window.draw(y_axis);
+            
+            //Gestione eventi
+            sf::Event evnt;
+            while(window.pollEvent(evnt)){
+                //Se clicco la X chiude la finestra
+                if(evnt.type == sf::Event::Closed){
+                    window.close();
+                }
+            }
+            
+            double j;
+            switch(c) {
+                case 's': case 'S':
+                    j = EDGE;
+                    bit.setFillColor(sf::Color::Green);
+                    for(auto const it: state_) {               
+                        bit.setPosition(j, height - EDGE - it.s*y_scale);
+                        window.draw(bit);
+                        j += x_up;
+                    }
+                    break;
+                case 'i': case 'I':
+                    j = EDGE;
+                    bit.setFillColor(sf::Color::Red);
+                    for(auto const it: state_) {               
+                        bit.setPosition(j, height - EDGE - it.i*y_scale);
+                        window.draw(bit);
+                        j += x_up;
+                    }
+                    break;
+                case 'r': case 'R':
+                    j = EDGE;
+                    bit.setFillColor(sf::Color::Blue);
+                    for(auto const it: state_) {               
+                        bit.setPosition(j, height - EDGE - it.r*y_scale);
+                        window.draw(bit);
+                        j += x_up;
+                    }
+                    break;
+                case 'a': case 'A': //Stampo tutti i case a=all
+                    j = EDGE;
+                    bit.setFillColor(sf::Color::Green);
+                    for(auto const it: state_) {               
+                        bit.setPosition(j, height - EDGE - it.s*y_scale);
+                        window.draw(bit);
+                        j += x_up;
+                    }
+                    j = EDGE;
+                    bit.setFillColor(sf::Color::Red);
+                    for(auto const it: state_) {               
+                        bit.setPosition(j, height - EDGE - it.i*y_scale);
+                        window.draw(bit);
+                        j += x_up;
+                    }
+                    j = EDGE;
+                    bit.setFillColor(sf::Color::Blue);
+                    for(auto const it: state_) {               
+                        bit.setPosition(j, height - EDGE - it.r*y_scale);
+                        window.draw(bit);
+                        j += x_up;
+                    }
+                    break;
+                default:
+                    throw std::runtime_error("Warning: invalid character passed at the draw function\n");
+            }
+
+            window.display();
+        }
+
+    }
+};
+
+#endif
