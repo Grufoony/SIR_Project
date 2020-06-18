@@ -1,0 +1,17 @@
+#include "board.h"
+
+int main(int argc, char* argv[]) {
+
+    constexpr int country_dim = 200;
+    Board b(country_dim, 0.3, 0.7);
+    /*b(1, 1) = Sir::i;
+    b(country_dim + 2, 1) = Sir::i;
+    b(1, country_dim + 2) = Sir::i;
+    b(country_dim + 2, country_dim + 2) = Sir::i; */
+    b(country_dim / 2, country_dim / 2) = Sir::i;               //Country 1
+    b(country_dim / 2, 3 * country_dim / 2) = Sir::i;           //Country 2
+    b(3 * country_dim / 2, country_dim / 2) = Sir::i;           //Country 3
+    b(3 * country_dim / 2, 3 * country_dim / 2) = Sir::i;       //Country 4
+    b.draw();
+    return 0;
+}
