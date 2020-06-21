@@ -50,11 +50,10 @@ class Board {
     double beta_;
     double gamma_;
     int day;
-    bool adv_opt;
-    int number_infected = 0;
-    int num_s1, num_s2, num_s3, num_s4;     // S, I, R dei singoli stati per grafico
+    int number_infected = 4;
+    /*int num_s1, num_s2, num_s3, num_s4;     // S, I, R dei singoli stati per grafico
     int num_i1, num_i2, num_i3, num_i4;
-    int num_r1, num_r2, num_r3, num_r4;
+    int num_r1, num_r2, num_r3, num_r4;*/
     
 public:
     Board(int country_dim, double b, double y) : grid_(2*country_dim + 3, std::vector<Cell>(2*country_dim + 3)){
@@ -81,6 +80,7 @@ public:
         return (grid_[riga + 1][colonna + 1].state);
     }
 
+
     void copy_(std::vector<std::vector<Sir>>& end) {
         for (int l = 1; l <= dimension_ - 1; ++l) {
             for (int c = 0; c <= dimension_ - 1; ++c) {
@@ -105,7 +105,7 @@ public:
                 if (grid_[l][c].state != Sir::b) {
                     int swap; // indicatore, se ha valore da 0 a 7 fa scambiare la cella con una delle 8 adiacenti
                     int newc, newl; //indici della cella da scambiare
-                    swap = (rand() + time(0)) % 13; //probabilità di circa il 60% che si sposti
+                    swap = (rand() + time(0)) % 8; //probabilità di circa il 60% che si sposti
                     switch (swap) {
                     case 0: newc = c - 1;   newl = l - 1;   break;
                     case 1: newc = c;       newl = l - 1;   break;
@@ -117,15 +117,7 @@ public:
                     case 7: newc = c + 1;   newl = l + 1;   break;
                     default: return;
                     }
-/*                    if (newc == 0)
-                        ++newc;
-                    if (newl == 0)
-                        ++newl;
-                    if (newc == dimension_ - 1)
-                        --newc;
-                    if (newl == dimension_ - 1)
-                        --newl;
-                    assert(newc > 0 && newc < dimension_ - 1 && newl>0 && newl < dimension_ - 1);*/
+
                     if (grid_[newl][newc].state != Sir::b && grid_[l][c].state != Sir::b) {
                         auto old = new Cell;
                         *old = grid_[l][c];
@@ -200,6 +192,7 @@ public:
                     int newc = 1 + (rand() + time(0)) % (dimension_ - 2);           // 1 <= newc <= dim_-2
                     
                     if (grid_[newl][newc].state != Sir::b && grid_[l][c].state != Sir::b) {
+                        
                         auto old = new Cell;
                         *old = grid_[l][c];
                         grid_[l][c] = grid_[newl][newc];
@@ -212,7 +205,7 @@ public:
     }
     
     //Funzione per avare la grafica
-    void draw() {
+    void draw(int refresh_time = 1) {
         float bit_size = 1.;
         //L'if di seguito setta di fatto un fattore di scala nel caso la board sia troppo piccola
         if (dimension_ < 100) {
@@ -228,12 +221,14 @@ public:
         sf::RectangleShape inf_bit(sf::Vector2f(bit_size, bit_size));
         sf::RectangleShape rec_bit(sf::Vector2f(bit_size, bit_size));
         sf::RectangleShape bound_bit(sf::Vector2f(bit_size, bit_size));
-
+        //sf::RenderWindow window2(sf::VideoMode(win_size, win_size), "Disease2", sf::Style::Close | sf::Style::Resize);
         sus_bit.setFillColor(sf::Color::Green);
         inf_bit.setFillColor(sf::Color::Red);
         rec_bit.setFillColor(sf::Color::Blue);
         bound_bit.setFillColor(sf::Color::Black);
 
+        sf::Clock clock;
+        sf::Time time;
         while (window.isOpen()) {
             //Gestione eventi
             sf::Event evnt;
@@ -243,14 +238,16 @@ public:
                     window.close();
                 }
             }
-            std::cout << "Day " << day << "  number of infected = " << number_infected << '\n';
+            
+            time = clock.getElapsedTime();
+            if (time.asSeconds() > refresh_time)
             {
+            std::cout << "Day " << day << "  number of infected = " << number_infected << '\n';
             evolve_();
             move_();
             airplane_();
-            }
-            for (int l = 0; l < dimension_ ; ++l) {
-                for (int c = 0; c < dimension_ ; ++c) {
+            for (int l = 0; l < dimension_; ++l) { 
+                for (int c = 0; c < dimension_; ++c) {
                     //Stampa le celle
                     if (grid_[l][c].state == Sir::s) {
                         sus_bit.setPosition(bit_size * c, bit_size * l);
@@ -269,7 +266,10 @@ public:
                         window.draw(bound_bit);
                     }
                 }
+            }   
+            clock.restart();
             }
+            
             window.display();
         }
     }
