@@ -12,13 +12,8 @@
 
 int constexpr EDGE = 20;
 
-struct State {
-    double s;
-    double i;
-    double r;
-    
-    State(double sus, double inf, double rec) : s{sus}, i{inf}, r{rec} {};
-};
+//Struct per indicare lo stato del "sistema" composto dai tre tipi s, i, r
+//Gli assert impongono valori positivi essendo una popolazione
 
 class Disease {
     private:
@@ -145,13 +140,12 @@ class Disease {
                     window.close();
                 }
             }
-            
             double j;
             switch(c) {
                 case 's': case 'S':
                     j = EDGE;
                     bit.setFillColor(sf::Color::Green);
-                    for(auto const it: state_) {               
+                    for(auto const it: state_) { 
                         bit.setPosition(j, height - EDGE - it.s*y_scale);
                         window.draw(bit);
                         j += x_up;
