@@ -14,6 +14,18 @@ int constexpr EDGE = 20;
 
 //Struct per indicare lo stato del "sistema" composto dai tre tipi s, i, r
 //Gli assert impongono valori positivi essendo una popolazione
+struct State {
+    double s;
+    double i;
+    double r;
+    
+    State(double sus, double inf, double rec) : s{sus}, i{inf}, r{rec} {
+        assert(s > 0 || s == 0);
+        assert(i > 0 || i == 0);
+        assert(r > 0 || r == 0);
+    };
+};
+
 
 class Disease {
     private:
