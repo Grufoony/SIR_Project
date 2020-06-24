@@ -24,6 +24,11 @@ struct State {
         assert(i > 0 || i == 0);
         assert(r > 0 || r == 0);
     };
+    State() {
+        s = 0.;
+        i = 0.;
+        r = 0.;
+    }
 };
 
 
@@ -37,7 +42,7 @@ class Disease {
     double beta_;
 
     auto evolve_(State const& begin) {
-        State end(0., 0., 0.);
+        auto end = State();
 
         //La funzione dei suscettibili è sempre decrescente, mi limito a metterla uguale a 0 quando, per errori di approssimazione, risulta <0
 
@@ -60,6 +65,10 @@ class Disease {
             end.i = tot_ - end.r - end.s;
         }
         //Verificare che s+i+r=n
+        //Verificare la valòidità dei dati
+        assert(end.s > 0 || end.s == 0);
+        assert(end.i > 0 || end.i == 0);
+        assert(end.r > 0 || end.r == 0);
 
         return end;
     };
@@ -80,17 +89,17 @@ class Disease {
     }
 
     //Funzione per cambiare il valore di beta
-    void setBeta(double& b) {
-        beta_ = b;
+    void setBeta(double b) {
+        beta_ = b/tot_;
     }
 
     //Funzione per cambiare il valore di gamma
-    void setGamma(double& g) {
+    void setGamma(double g) {
         gamma_ = g;
     }
 
     //Evolvo la malattia per n giorni
-    void evolve(int& n) {
+    void evolve(int n) {
         for(int i = 0; i < n; ++i) {
             state_.push_back(evolve_(state_[i]));
         }
