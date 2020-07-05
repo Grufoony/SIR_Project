@@ -1,6 +1,8 @@
+
 #include"board.hpp"
 #include <SFML/Graphics.hpp>
 #include<cassert>
+
 void Board::draw(int& millisecondi) {
     float bit_size = 1.;
     //L'if di seguito setta di fatto un fattore di scala nel caso la board sia troppo piccola
@@ -17,14 +19,14 @@ void Board::draw(int& millisecondi) {
     sf::RectangleShape sus_bit(sf::Vector2f(bit_size, bit_size));
     sf::RectangleShape inf_bit(sf::Vector2f(bit_size, bit_size));
     sf::RectangleShape rec_bit(sf::Vector2f(bit_size, bit_size));
-    sf::RectangleShape confine_fra_i_due_grafici(sf::Vector2f(bit_size, bit_size));
-    sf::RectangleShape quarantenato(sf::Vector2f(bit_size, bit_size));
+    sf::RectangleShape board(sf::Vector2f(bit_size, bit_size));
+    sf::RectangleShape q_bit(sf::Vector2f(bit_size, bit_size));
 
     sus_bit.setFillColor(sf::Color::Green);
     inf_bit.setFillColor(sf::Color::Red);
     rec_bit.setFillColor(sf::Color::Blue);
-    confine_fra_i_due_grafici.setFillColor(sf::Color::Yellow);
-    quarantenato.setFillColor(sf::Color::Black);
+    board.setFillColor(sf::Color::Magenta);
+    q_bit.setFillColor(sf::Color::Black);
 
     std::cout << "day**********" << "number_infected" << '\n';
     sf::Clock clock;
@@ -74,12 +76,12 @@ void Board::draw(int& millisecondi) {
                         window.draw(rec_bit);
                     }
                     else if (grid_[l][c].state == Sir::q_edge) {
-                        quarantenato.setPosition(bit_size * c, bit_size * l);
-                        window.draw(quarantenato);
+                        board.setPosition(bit_size * c, bit_size * l);
+                        window.draw(board);
                     }
                     else if (grid_[l][c].state == Sir::q) {
-                        quarantenato.setPosition(bit_size * c, bit_size * l);
-                        window.draw(quarantenato);
+                        q_bit.setPosition(bit_size * c, bit_size * l);
+                        window.draw(q_bit);
                     }
                 }
 
@@ -98,8 +100,8 @@ void Board::draw(int& millisecondi) {
                 grafico_out_quarantene.push_back({ graph_point_s , graph_point_i , graph_point_r });
                 //confine fra i due grafici.
                 for (int i = dimension_ + 1; i < (5 * dimension_*bit_size / 3); ++i) {
-                    confine_fra_i_due_grafici.setPosition(i * bit_size, static_cast<float>(dimension_ / 2));
-                    window.draw(confine_fra_i_due_grafici);
+                    board.setPosition(i * bit_size, static_cast<float>(dimension_ / 2));
+                    window.draw(board);
                     // liberi grafico
                     for (int counter = 0; counter != grafico_out_quarantene.size(); ++counter) {
                         if (grafico_out_quarantene[counter].num_i <= 1) {
