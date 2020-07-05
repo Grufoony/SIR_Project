@@ -3,7 +3,7 @@
 //
 //
 // Questo programma illustra l'evoluzione di una ipotetica pandemia secondo
-// il modello Sir. Tale modello Ë stato poi implementato con quarantenati ed altre modalit‡                                                                        
+// il modello Sir. Tale modello √® stato poi implementato con quarantenati ed altre modalit√†                                                                        
 // descritte nella relazione allegata.                                                                                                                                                                                                             
 //*******************************************************************************************
 #include "board.h"
@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     try {
         /***********************************************************
         Ultima opzione del progetto d'esame. varie opzioni possibili.
-        Possibilit‡ di attivare varie opzioni avanzate.
+        Possibilit√† di attivare varie opzioni avanzate.
         ***********************************************************/
         int dim = 400;
         double beta_model = 0.2;
@@ -29,12 +29,12 @@ int main(int argc, char* argv[]) {
      
 
         /***********************************************************
-        qui di seguito Ë riportata l'opzione 1 richiesta per l'esame.
-        Si Ë deciso di utilizzarla per portare un confronto teorico.
+        qui di seguito √® riportata l'opzione 1 richiesta per l'esame.
+        Si √® deciso di utilizzarla per portare un confronto teorico.
         ***********************************************************/
         double gamma_sir = 0.001;
         double beta_sir = 0.018;
-        int days = 1600;
+        int days = 600;
         desease::Disease d("COVID-19", dim * dim,beta_sir , gamma_sir);
         d.evolve(days);
         d.f_print();
