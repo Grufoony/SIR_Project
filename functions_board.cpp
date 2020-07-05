@@ -4,6 +4,7 @@
 #include<random>
 #include<ctime>
 #include<stdexcept>
+#include <SFML/Graphics.hpp>
 // q_prob_ è la probabilità che lo stato trovi un malato e lo metta in quarantena 
     Board::Board(std::string c,int n, double b, double y,double q_prob,int inf, Quarantene_parameters quarantene,Mode adv_opt) :
         grid_(n + 2, std::vector<Cell>(n + 2)), dimension_{ n + 2 }, q_prob_{q_prob},
@@ -235,3 +236,201 @@
             }
         }
     }
+void Board::draw(int& millisecondi) {
+    float bit_size = 1.f;
+    int win_size = static_cast<int>(bit_size * dimension_);
+    assert(win_size > 99 && win_size < 1001);
+    sf::RenderWindow window(sf::VideoMode(win_size + static_cast<int>((2 * win_size / 3)), win_size),
+        name_, sf::Style::Close | sf::Style::Resize);
+
+    window.setVerticalSyncEnabled(true);
+    //Setto i bit dei quadratini e i rispettivi colori
+    sf::RectangleShape sus_bit(sf::Vector2f(bit_size, bit_size));
+    sf::RectangleShape inf_bit(sf::Vector2f(bit_size, bit_size));
+    sf::RectangleShape rec_bit(sf::Vector2f(bit_size, bit_size));
+    sf::RectangleShape board(sf::Vector2f(bit_size, bit_size));
+    sf::RectangleShape q_bit(sf::Vector2f(bit_size, bit_size));
+
+    sus_bit.setFillColor(sf::Color::Green);
+    inf_bit.setFillColor(sf::Color::Red);
+    rec_bit.setFillColor(sf::Color::Blue);
+    board.setFillColor(sf::Color::Magenta);
+    q_bit.setFillColor(sf::Color::Black);
+
+    std::cout << "day**********" << "number_infected" << '\n';
+    sf::Clock clock;
+    sf::Time time;
+    bool flag = true;
+    while (window.isOpen())
+    {
+
+        if (day_ >= quaranten.first_day && flag && (int)advanced_opt>=4) {
+            quarantene_();
+            flag = false;
+        }
+        sf::Event evnt;
+        
+        while (window.pollEvent(evnt)) {
+            if (evnt.type == sf::Event::Closed) {
+                window.close();
+            }
+        }
+        // questo if dovrà comprendere le funzioni avanzate di fusco.La funzione evolve,move e airplane devono attivarsi a seconde dell unum che gli passiamo.
+    //scendi piu' in basso a leggere per il commento con i grafici.
+        time = clock.getElapsedTime();
+        if (time.asMilliseconds() > millisecondi) {
+       
+            evolve_();
+            if ((int)advanced_opt >=1) {
+                move_();
+            }
+            if ((int)advanced_opt >=2) {
+                airplane_();
+            }
+            clock.restart();
+            std::cout << "" << day_ + 1 << "            " << counter.num_i + q_counter.num_i << '\n';
+            for (int l = 1; l < dimension_ - 1; ++l) {
+                for (int c = 1; c < dimension_ - 1; ++c) {
+                    //Stampa le celle
+                    if (grid_[l][c].state == Sir::s) {
+                        sus_bit.setPosition(bit_size * c, bit_size * l);
+                        window.draw(sus_bit);
+                    }
+                    else if (grid_[l][c].state == Sir::i) {
+                        inf_bit.setPosition(bit_size * c, bit_size * l);
+                        window.draw(inf_bit);
+                    }
+                    else if (grid_[l][c].state == Sir::r) {
+                        rec_bit.setPosition(bit_size * c, bit_size * l);
+                        window.draw(rec_bit);
+                    }
+                    else if (grid_[l][c].state == Sir::q_edge) {
+                        board.setPosition(bit_size * c, bit_size * l);
+                        window.draw(board);
+                    }
+                    else if (grid_[l][c].state == Sir::q) {
+                        q_bit.setPosition(bit_size * c, bit_size * l);
+                        window.draw(q_bit);
+                    }
+                }
+
+            }
+
+            // questo è il grafico che si attiva solo se la mia opzione( l'ultima) è attiva.
+            if ((int)advanced_opt>=4) {
+                int q_point_s = static_cast<int> (q_counter.num_s  / (quaranten.len_line));
+                int q_point_i = static_cast<int> (q_counter.num_i  / (quaranten.len_line));
+                int q_point_r = static_cast<int> (q_counter.num_r  / (quaranten.len_line));
+                int proportion = dimension_ - ((quaranten.len_line * quaranten.len_line) / dimension_);
+                int graph_point_i = static_cast<int>((counter.num_i-q_counter.num_i)*0.5 /proportion);
+                int graph_point_s =static_cast<int>((counter.num_s-q_counter.num_s)*0.5/(proportion));
+                int graph_point_r = static_cast<int>((counter.num_r-q_counter.num_r)*0.5 /(proportion));
+                grafico_in_quarantene.push_back({ q_point_s,q_point_i,q_point_r });
+                grafico_out_quarantene.push_back({ graph_point_s , graph_point_i , graph_point_r });
+                //confine fra i due grafici.
+                for (int i = dimension_ + 1; i < (5 * dimension_*bit_size / 3); ++i) {
+                    board.setPosition(i * bit_size, static_cast<float>(dimension_ / 2));
+                    window.draw(board);
+                    // liberi grafico
+                    for (int counter = 0; counter != grafico_out_quarantene.size(); ++counter) {
+                        if (grafico_out_quarantene[counter].num_i <= 1) {
+                            inf_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_ / 2) - 3);
+                            window.draw(inf_bit);
+                        }
+                        else {
+                            inf_bit.setPosition(static_cast<float>(dimension_ + counter + 1), static_cast<float>(dimension_ / 2 - grafico_out_quarantene[counter].num_i)-3);
+                            window.draw(inf_bit);
+                        }
+                        if (grafico_out_quarantene[counter].num_s <= 1) {
+                            sus_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_ / 2) - 1);
+                            window.draw(sus_bit);
+                        }
+                        else {
+                            sus_bit.setPosition(static_cast<float>(dimension_ + counter + 1), static_cast<float>(dimension_ / 2 - grafico_out_quarantene[counter].num_s) + 1);
+                            window.draw(sus_bit);
+                        }
+                        if (grafico_out_quarantene[counter].num_r <= 1) {
+                            rec_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_ / 2) - 2);
+                            window.draw(rec_bit);
+                        }
+                        else {
+                            rec_bit.setPosition(static_cast<float>(dimension_ + counter + 1), static_cast<float>(dimension_ / 2 - grafico_out_quarantene[counter].num_r) -2);
+                            window.draw(rec_bit);
+                        }
+                        // quarantenati stato
+                            if (grafico_in_quarantene[counter].num_i <= 1) {
+                                inf_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_) - 2);
+                                window.draw(inf_bit);
+                            }
+                            else {
+                                inf_bit.setPosition(static_cast<float>(dimension_ + counter + 1), static_cast<float>(dimension_)- grafico_in_quarantene[counter].num_i + 1);
+                                window.draw(inf_bit);
+                            }
+                            if (grafico_in_quarantene[counter].num_s <= 1) {
+                                sus_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_) - 1);
+                                window.draw(sus_bit);
+                            }
+                            else {
+                                sus_bit.setPosition(static_cast<float>(dimension_ + counter + 1), static_cast<float>(dimension_ - grafico_in_quarantene[counter].num_s+2));
+                                window.draw(sus_bit);
+                            }
+                            if (grafico_in_quarantene[counter].num_r <= 1) {
+                                rec_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_) - 1);
+                                window.draw(rec_bit);
+                            }
+                            else {
+                                rec_bit.setPosition(static_cast<float>(dimension_ + counter + 1), static_cast<float>(dimension_ - grafico_in_quarantene[counter].num_r) + 1);
+                                window.draw(rec_bit);
+                            }
+                        
+                    }
+                }
+                window.display();
+                if (day_ > 250) {
+                    window.close();
+
+                }
+            }    
+                // questo grafico si attiva in tutti gli altri casi.
+            else {
+                    int graph_point_i = static_cast<int>(counter.num_i / dimension_);
+                    int graph_point_s = static_cast<int>(counter.num_s / dimension_);
+                    int graph_point_r = static_cast<int>(counter.num_r / dimension_);
+                    // grafico_out_quarantene.num_i.push_back(punto_del_grafico);
+                    grafico_out_quarantene.push_back({ graph_point_s , graph_point_i , graph_point_r });
+                    for (int counter = 0; counter != grafico_out_quarantene.size(); ++counter) {
+                        if (grafico_out_quarantene[counter].num_i <= 1) {
+                            inf_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_) - 2);
+                            window.draw(inf_bit);
+                        }
+                        else {
+                            inf_bit.setPosition(static_cast<float>(dimension_ + counter + 1), static_cast<float>(dimension_ - grafico_out_quarantene[counter].num_i) + 1);
+                            window.draw(inf_bit);
+                        }
+                        if (grafico_out_quarantene[counter].num_s <= 1) {
+                            sus_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_) - 1);
+                            window.draw(sus_bit);
+                        }
+                        else {
+                            sus_bit.setPosition(static_cast<float>(dimension_ + counter + 1), static_cast<float>(dimension_ - grafico_out_quarantene[counter].num_s) + 1);
+                            window.draw(sus_bit);
+                        }
+                        if (grafico_out_quarantene[counter].num_r <= 1) {
+                            rec_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_) - 1);
+                            window.draw(rec_bit);
+                        }
+                        else {
+                            rec_bit.setPosition(static_cast<float>(dimension_ + counter + 1), static_cast<float>(dimension_ - grafico_out_quarantene[counter].num_r) + 1);
+                            window.draw(rec_bit);
+                        }
+                    }
+                    window.display();
+                    if (day_ > 250) {
+                        window.close();
+                    }
+                }
+
+            }           
+        }
+}
+
