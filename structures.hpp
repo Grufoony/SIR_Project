@@ -1,5 +1,8 @@
-#pragma once
+#ifndef STRUCTURES_HPP
+#define STRUCTURES_HPP
+
 #include<iostream>
+#include<cassert>
 
     enum class Sir :char {
         s, i, r, q, q_edge
@@ -38,3 +41,23 @@
         default: return hs;
         }
     };
+
+    //Per la classe disease
+    struct State {
+        double s;
+        double i;
+        double r;
+
+        State(double sus, double inf, double rec) : s{ sus }, i{ inf }, r{ rec } {
+            assert(s > 0 || s == 0);
+            assert(i > 0 || i == 0);
+            assert(r > 0 || r == 0);
+        };
+        State() {
+            s = 0.;
+            i = 0.;
+            r = 0.;
+        }
+    };
+
+#endif

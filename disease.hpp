@@ -1,5 +1,6 @@
 #ifndef DiSEASE_HPP
 #define DISEASE_HPP
+
 #include <vector>
 #include <cassert>
 #include <stdexcept>
@@ -8,7 +9,8 @@
 #include <fstream>
 #include <string>
 #include <SFML/Graphics.hpp>
-#include"structures_disease.hpp"
+#include "structures.hpp"
+
 namespace disease {
     int constexpr EDGE = 20;
 	class Disease {
@@ -29,4 +31,5 @@ namespace disease {
         void draw(int lenght, int height, const char& c);
 	};
 }
+
 #endif

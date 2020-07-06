@@ -1,5 +1,6 @@
 #ifndef BOARD_HPP
 #define Board_HPP
+
 #include"structures.hpp"
 #include<vector>
 #include<iostream>
@@ -15,7 +16,7 @@ private:
     Counter counter;
     Counter q_counter;
     double q_prob_;
-    Mode advanced_opt;
+    Mode advanced_opt_;
     Quarantene_parameters quaranten;
     std::vector<Counter> grafico_out_quarantene;
     std::vector<Counter> grafico_in_quarantene;
@@ -30,6 +31,6 @@ public:
     void quarantene_();
     void airplane_();
     void draw(int& secondi);
-   
 };
+
 #endif
