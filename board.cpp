@@ -36,9 +36,9 @@
     Sir& Board::operator()(int riga, int column) {
         return (grid_[riga + 1][column + 1].state);
     }
+    //Nuovo algortimo, genero un numero casuale tra 0 e 100, se questo numero è minore della probabilità attesa (beta, gamma, q), allora applico il cambiamento alla cella
     void Board::evolve_() {
-        std::vector<std::vector<Cell>> temp(dimension_ - 2, std::vector<Cell>(dimension_ - 2));
-        temp = grid_;
+        auto temp = grid_;
         for(int l = 1; l < dimension_-1; ++l) {
             for(int c = 1; c < dimension_-1; ++c) {
                 if(temp[l][c].state == Sir::s) {
