@@ -16,20 +16,20 @@ private:
     Counter q_counter;
     double q_prob_;
     Mode advanced_opt;
-    Quarantene_parameters quaranten;
-    std::vector<Counter> grafico_out_quarantene;
-    std::vector<Counter> grafico_in_quarantene;
+    Quarantine_parameters quarantin;
+    std::vector<Counter> graph_out_quarantine;
+    std::vector<Counter> graph_in_quarantine;
 public:
-    Board(std::string c,int n, double b, double y, double q_prob,int inf, Quarantene_parameters quarantene,Mode mode=Mode::Still);
+    Board(std::string c, int n, double b, double y,  int inf, Mode mode = Mode::Still, double q_prob = 0., Quarantine_parameters quarantene = {0, 0, 0});
     void copy_(std::vector<std::vector<Sir>>& end);
-    void counter_quarantene_infected();
+    void counter_quarantine_infected();
     void counter_infected();
     Sir& operator()(int riga, int colonna);
     void move_();
     void evolve_();
-    void quarantene_();
+    void quarantine_();
     void airplane_();
     void draw(int& secondi);
-   
+
 };
 #endif
