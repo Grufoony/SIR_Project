@@ -1,4 +1,5 @@
 #include"board.hpp"
+#include <algorithm>
 #include<cassert>
 #include<random>
 #include<ctime>
@@ -36,82 +37,47 @@
         return (grid_[riga + 1][column + 1].state);
     }
     void Board::evolve_() {
-        std::vector<std::vector<Sir>> end(dimension_ - 2, std::vector<Sir>(dimension_ - 2));
-        int teoretical_ill = static_cast<int>(dimension_ * beta_);
-        int malati_trovati = static_cast<int>(teoretical_ill * q_prob_);
-        for (int l = 1; l < dimension_ - 1; ++l) {
-            for (int c = 1; c < dimension_ - 1; ++c) {
-                if (grid_[l][c].state == Sir::s) {
+        std::vector<std::vector<Cell>> temp(dimension_ - 2, std::vector<Cell>(dimension_ - 2));
+        temp = grid_;
+        for(int l = 1; l < dimension_-1; ++l) {
+            for(int c = 1; c < dimension_-1; ++c) {
+                if(temp[l][c].state == Sir::s) {
                     for (int j = -1; j <= 1; ++j) {
                         for (int i = -1; i <= 1; ++i) {
-                            if (grid_[l + j][c + i].state == Sir::i && grid_[l + j][c + i].state != Sir::s) {
-                                grid_[l][c].inf_prob += beta_; //somma delle probabilita di infettarsi attorno alla cella.
-                                //quando tale probabilità diventa uno la cella si ammala
+                            if (temp[l + j][c + i].state == Sir::i) {
+                                int ran = ((rand() + time(0)) % 101) -1;
+                                if(ran < (int)beta_*100) {
+                                    ++grid_[l][c].state;
+                                }                               
                             }
-                            else {
-                                grid_[l][c].inf_prob += 0;
-                            }
                         }
                     }
-                    if (grid_[l][c].inf_prob >= 1) {
-                        ++end[l - 1][c - 1];
-                        grid_[l][c].inf_prob = 0;
-                    }
-                    else {
-                        end[l - 1][c - 1];
-                    }
-                }
-                //metodo di greg corretto: quando una persona è malata o guarisce però dopo 14 giorni ,oppure viene messa in quarantena prima di guarire.
-                //definisco un intervallo( teoretical ill), genero un numero fra 0 e il  sup di tale intervallo.
-                //matati trovati è un numero dipendete da q_prob_ compreso fra zero ed il precedente sup. da qui si comprende l if.
-                // deve introdurre un opzione avanzata il fatto che ci si possa quarantenare. Fusco deve agire qui
-                else if (grid_[l][c].state == Sir::i) {
-                    int n = (rand() + time(0)) % (teoretical_ill);
-                    if (n < malati_trovati && day_>10 && ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)) {
-                        end[l - 1][c - 1] = Sir::q;
-                    }
-                    else {
-                        grid_[l][c].clock += 1;
-                        if (grid_[l][c].clock > 14) {
-                            ++(++end[l - 1][c - 1]);
-                            grid_[l][c].clock = 0;
-                        }
-                        else {
-                            ++end[l - 1][c - 1];
+                } else if(temp[l][c].state == Sir::i) {
+                    int ran = ((rand() + time(0)) % 101) -1;
+                    if(ran < (int)gamma_*100) {
+                        ++grid_[l][c].state;
+                    } else {
+                        ran = ((rand() + time(0)) % 101) -1;
+                        if(ran < (int)q_prob_*100) {
+                            grid_[l][c].state = Sir::q;
                         }
                     }
-                }
-                else if (grid_[l][c].state == Sir::r) {
-                    ++(++end[l - 1][c - 1]);
-                }
-                //questo if è per l ultima opzione avanzata,dove ho il borod della quarantena.
-                else if (grid_[l][c].state == Sir::q_edge) {
-                    if (day_ < quaranten.last_day)
-                        end[l - 1][c - 1] = Sir::q_edge;
-                    else
-                        end[l - 1][c - 1] ;
-                }
-                // quando un malatom viene trovato malato viene messo in quarantena. Ci sta per 40 giorni poi è libero. dve essere un opzione avanzata di fusco.
-                else if (grid_[l][c].state == Sir::q) {
-                    if (grid_[l][c].clock == 40) {
-                        end[l - 1][c - 1] = Sir::r;
-                        grid_[l][c].clock = 0;
-                    }
-                    else {
+                } else if(temp[l][c].state == Sir::q) {
+                    if(temp[l][c].clock == 40) {
+                        ++grid_[l][c].state;
+                    } else {
                         ++grid_[l][c].clock;
-                        end[l - 1][c - 1] = Sir::q;
                     }
                 }
-
             }
         }
         counter_infected();
         counter_quarantene_infected();
         ++day_;
-        copy_(end);
+        //copy_(end);
     }
     // funzione che definisce una sola volta i bordi per la quarantena.
-//LI dichiara visibili in modo tale che draw stampi il bordo nero dell'opzione di pivi.
+    //LI dichiara visibili in modo tale che draw stampi il bordo nero dell'opzione di pivi.
     void Board::quarantene_() {
         for (int l = 1; l < dimension_; ++l) {
             for (int c = 1; c < dimension_; ++c) {
