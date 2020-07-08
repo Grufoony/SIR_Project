@@ -7,8 +7,8 @@
 // descritte nella relazione allegata.                                                                                                                                                                                                             
 //*******************************************************************************************
 
-#include "board.h"
-#include "disease.h"
+#include "board.hpp"
+#include "disease.hpp"
 
 int main() {
     try {
