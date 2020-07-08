@@ -30,6 +30,10 @@ auto disease::Disease::evolve_(State const& begin) {
 
     return end;
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 disease::Disease::Disease(std::string p, int n, double  b, double y) : name_{ p } {
     //Verifico che i dati inseriti siano coerenti
     assert(b > 0 && b < 1);
@@ -42,6 +46,10 @@ disease::Disease::Disease(std::string p, int n, double  b, double y) : name_{ p 
     State state_0{ (double)n - 1., 1., 0. };
     state_.push_back(state_0);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void disease::Disease::setBeta(double b) {
     beta_ = b / tot_;
 }
@@ -53,6 +61,10 @@ void disease::Disease::evolve(int n) {
         state_.push_back(evolve_(state_[i]));
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void disease::Disease::print() {
     int i = 0;
     auto tab = std::setw(20);
@@ -65,6 +77,11 @@ void disease::Disease::print() {
         ++i;
     }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 void disease::Disease::f_print() {
 
     //Sposto l'output su file
@@ -75,24 +92,47 @@ void disease::Disease::f_print() {
     print();
     fp.close();
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+double disease::Disease::get_state_s(int i) {
+    return(state_[i].s);
+}
+double disease::Disease::get_state_i(int i) {
+    return( state_[i].i);
+   
+}
+double disease::Disease::get_state_r(int i) {
+    return(state_[i].r);
+}
+double disease::Disease::get_beta() {
+    return beta_;
+}
+double disease::Disease::get_gamma() {
+    return gamma_;
+}
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+
 void disease::Disease::draw(int lenght, int height, const char& c) {
     sf::RenderWindow window(sf::VideoMode(lenght, height), name_, sf::Style::Close | sf::Style::Resize);
     window.setVerticalSyncEnabled(true);
-    sf::RectangleShape x_axis(sf::Vector2f(lenght, 1));
-    sf::RectangleShape y_axis(sf::Vector2f(1, height));
-    x_axis.setPosition(0, height - EDGE);
+    sf::RectangleShape x_axis(sf::Vector2f(static_cast<float>(lenght), 1.f));
+    sf::RectangleShape y_axis(sf::Vector2f(1.f, static_cast<float>(height)));
+    x_axis.setPosition(0.f, static_cast<float>(height - EDGE));
     y_axis.setPosition(EDGE, 0);
-    x_axis.setFillColor(sf::Color::Black);
-    y_axis.setFillColor(sf::Color::Black);
+    x_axis.setFillColor(sf::Color::White);
+    y_axis.setFillColor(sf::Color::White);
 
     //Settiamo ora le variabili per mettere tutto in "scala"
     auto x_up = (lenght - EDGE) / state_.size();
-    auto y_scale = (height - 2 * EDGE) / tot_;
+    auto y_scale = (height - (2 * EDGE)) / tot_;
 
     sf::RectangleShape bit(sf::Vector2f(2., 2.));
 
     while (window.isOpen()) {
-        window.clear(sf::Color::White);
+        window.clear(sf::Color::Black);
         window.draw(x_axis);
         window.draw(y_axis);
 
@@ -110,7 +150,7 @@ void disease::Disease::draw(int lenght, int height, const char& c) {
             j = EDGE;
             bit.setFillColor(sf::Color::Green);
             for (auto const it : state_) {
-                bit.setPosition(j, height - EDGE - it.s * y_scale);
+                bit.setPosition(static_cast<float>(j), static_cast<float>(height - EDGE - it.s * y_scale));
                 window.draw(bit);
                 j += x_up;
             }
@@ -119,7 +159,7 @@ void disease::Disease::draw(int lenght, int height, const char& c) {
             j = EDGE;
             bit.setFillColor(sf::Color::Red);
             for (auto const it : state_) {
-                bit.setPosition(j, height - EDGE - it.i * y_scale);
+                bit.setPosition(static_cast<float>(j), static_cast<float>(height - EDGE - it.i * y_scale));
                 window.draw(bit);
                 j += x_up;
             }
@@ -128,7 +168,7 @@ void disease::Disease::draw(int lenght, int height, const char& c) {
             j = EDGE;
             bit.setFillColor(sf::Color::Blue);
             for (auto const it : state_) {
-                bit.setPosition(j, height - EDGE - it.r * y_scale);
+                bit.setPosition(static_cast<float>(j),static_cast<float>( height - EDGE - it.r * y_scale));
                 window.draw(bit);
                 j += x_up;
             }
@@ -137,21 +177,21 @@ void disease::Disease::draw(int lenght, int height, const char& c) {
             j = EDGE;
             bit.setFillColor(sf::Color::Green);
             for (auto const it : state_) {
-                bit.setPosition(j, height - EDGE - it.s * y_scale);
+                bit.setPosition(static_cast<float>(j),static_cast<float>( height - EDGE - it.s * y_scale));
                 window.draw(bit);
                 j += x_up;
             }
             j = EDGE;
             bit.setFillColor(sf::Color::Red);
             for (auto const it : state_) {
-                bit.setPosition(j, height - EDGE - it.i * y_scale);
+                bit.setPosition(static_cast<float>(j),static_cast<float>( height - EDGE - it.i * y_scale));
                 window.draw(bit);
                 j += x_up;
             }
             j = EDGE;
             bit.setFillColor(sf::Color::Blue);
             for (auto const it : state_) {
-                bit.setPosition(j, height - EDGE - it.r * y_scale);
+                bit.setPosition(static_cast<float>(j),static_cast<float>( height - EDGE - it.r * y_scale));
                 window.draw(bit);
                 j += x_up;
             }
@@ -159,7 +199,6 @@ void disease::Disease::draw(int lenght, int height, const char& c) {
         default:
             throw std::runtime_error("Warning: invalid character passed at the draw function\n");
         }
-
         window.display();
     }
 
