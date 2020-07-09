@@ -131,7 +131,7 @@ void sir::Board::evolve_() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int& sir::Board::gen_unif_rand_number(int num) const{
+int sir::Board::gen_unif_rand_number(int num) const{
     int x;
     std::random_device dev{};
     std::mt19937 gen{ dev() };
@@ -148,7 +148,7 @@ void sir::Board::copy_(std::vector<std::vector<Sir>>& copy) {
         for (int c = 0; c <= dimension_ - 1; ++c) {
             if (l == 0 || c == 0 || l == dimension_ - 1 || c == dimension_ - 1)
             {
-                grid_[l][c].state = Sir::q_edge;
+                grid_[l][c].state = Sir::q;
             }
             else {
                 grid_[l][c].state = copy[l - 1][c - 1];
@@ -180,7 +180,7 @@ void sir::Board::counter_quarantene_infected() {
 }
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   ACTIVATES THE QUARANTENE IN A QUARTER OF THE GRID
+   This member function activates the quarantene of Grid's quarter.
 *///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void sir::Board::quarantine_() {
