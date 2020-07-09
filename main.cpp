@@ -12,32 +12,62 @@
 
 int main() {
     try {
-        /***********************************************************
-        Ultima opzione del progetto d'esame. varie opzioni possibili.
-        Possibilità di attivare varie opzioni avanzate.
-        ***********************************************************/
-        std::string name{ "Covid-19" };
-        int dim = 400;
-        double beta_model = 0.2;
-        double gamma_model = 0.5;
-        Quarantene_parameters Quarantine;
-        Quarantine.first_day = 20;
-        Quarantine.last_day = 120;
-        Board b(name, dim, beta_model, gamma_model, 0.09, 3, Quarantine, Mode::Quarantene_1_and_2);
-        int refresh_rate = 10; //ms
+        std::string name;
+        int option;       
+        constexpr int num_initial_infected = 5;
+        constexpr int dim = 200;
+        constexpr double Beta = 0.2;
+        constexpr double Gamma = 0.15;
+        double q_prob = 0;
+        Mode adv_opt;
+        Quarantine_parameters Quarantine;
+        Quarantine.first_day = 0;
+        Quarantine.last_day = 0;
+
+        std::cout << "Welcome to the simulation of an epidemic disease!\n";
+        std::cout << "The name of the disease is:";
+        std::cin >> name;
+        std::cout << "Choose the mode:\n1) Still \n2) Move\n3) Move Plus\n4) Quarantine 1\n5) Quarantine 2\n"
+            "6) Quarantine 1 and 2\nYour choice: ";
+        std::cin >> option;
+
+        switch (option)
+        {
+        case 1:adv_opt = Mode::Still; break;
+        case 2:adv_opt = Mode::Move; break;;
+        case 3:adv_opt = Mode::Move_Plus; break;
+        case 4:adv_opt = Mode::Quarantine_1; 
+            q_prob = 0.4;
+            break;
+        case 5:adv_opt = Mode::Quarantine_2; 
+            Quarantine.first_day = 10;
+            Quarantine.last_day = 150;
+            break;
+        case 6:adv_opt = Mode::Quarantine_1_and_2; 
+            q_prob = 0.4;
+            Quarantine.first_day = 10;
+            Quarantine.last_day = 150;
+            break;
+        default:
+            throw std::runtime_error{ "Invalid selected mode" };
+        }
+       
+        sir::Board b(name, dim, Beta, Gamma, num_initial_infected, adv_opt, q_prob, Quarantine);
+        int refresh_rate = 200; //ms
         b.draw(refresh_rate);
+
         /***********************************************************
         Di seguito è riportata l'opzione 1 richiesta per l'esame.
         Si è deciso di utilizzarla per portare un confronto teorico.
         ***********************************************************/
+
         double gamma_sir = 0.01;
         double beta_sir = 0.18;
         int days = 600;
-        disease::Disease d("COVID-19", dim * dim, beta_sir, gamma_sir);
+        disease::Disease d(name, dim * dim, beta_sir, gamma_sir);
         d.evolve(days);
         d.f_print();
-        d.draw(1280, 720, 'A');
-
+        d.draw(700, 500, 'A');
     }
     catch (std::runtime_error& e) {
         std::cerr << e.what();
