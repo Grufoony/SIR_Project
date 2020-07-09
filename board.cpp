@@ -63,58 +63,58 @@ void sir::Board::evolve_() {
     int n;
     for (int l = 1; l < dimension_ - 1; ++l) {
         for (int c = 1; c < dimension_ - 1; ++c) {
-            switch(grid_[l][c].state) {
-                case Sir::s :
-                    for (int j = -1; j <= 1; ++j) {
-                        for (int i = -1; i <= 1; ++i) {
-                            if (grid_[l + j][c + i].state == Sir::i && grid_[l + j][c + i].state != Sir::s) {
-                                grid_[l][c].inf_prob += beta_; 
-                            }
-                            else {
-                                grid_[l][c].inf_prob += 0;
-                            }
-                        }
-                    }
-                    if (grid_[l][c].inf_prob >= 1) {
-                        ++temp[l - 1][c - 1];
-                        grid_[l][c].inf_prob = 0;
-                    }
-                    break;
-                case Sir::i :
-                    n = gen_unif_rand_number(theoretical_ill);
-                    if (n <ill_found && day_>10 && ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)) {
-                        temp[l - 1][c - 1] = Sir::q;
-                    }
-                    else {
-                        grid_[l][c].clock += 1;
-                        if (grid_[l][c].clock > 14) {
-                            ++(++temp[l - 1][c - 1]);
-                            grid_[l][c].clock = 0;
+            switch (grid_[l][c].state) {
+            case Sir::s:
+                for (int j = -1; j <= 1; ++j) {
+                    for (int i = -1; i <= 1; ++i) {
+                        if (grid_[l + j][c + i].state == Sir::i && grid_[l + j][c + i].state != Sir::s) {
+                            grid_[l][c].inf_prob += beta_;
                         }
                         else {
-                            ++temp[l - 1][c - 1];
+                            grid_[l][c].inf_prob += 0;
                         }
                     }
-                    break;
-                case Sir::r :
-                    ++(++temp[l - 1][c - 1]);
-                    break;
-                case Sir::q :
-                    if (grid_[l][c].clock == 40) {
-                        temp[l - 1][c - 1] = Sir::r;
+                }
+                if (grid_[l][c].inf_prob >= 1) {
+                    ++temp[l - 1][c - 1];
+                    grid_[l][c].inf_prob = 0;
+                }
+                break;
+            case Sir::i:
+                n = gen_unif_rand_number(theoretical_ill);
+                if (n < ill_found && day_>10 && ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)) {
+                    temp[l - 1][c - 1] = Sir::q;
+                }
+                else {
+                    grid_[l][c].clock += 1;
+                    if (grid_[l][c].clock > 14) {
+                        ++(++temp[l - 1][c - 1]);
                         grid_[l][c].clock = 0;
                     }
                     else {
-                        ++grid_[l][c].clock;
-                        temp[l - 1][c - 1] = Sir::q;
+                        ++temp[l - 1][c - 1];
                     }
-                    break;
-                case Sir::q_edge :
-                    if (day_ < quarantin_.last_day) {
-                        temp[l - 1][c - 1] = Sir::q_edge;
-                    }
-                    break;
-                default: throw std::runtime_error("ERROR.\n");
+                }
+                break;
+            case Sir::r:
+                ++(++temp[l - 1][c - 1]);
+                break;
+            case Sir::q:
+                if (grid_[l][c].clock == 40) {
+                    temp[l - 1][c - 1] = Sir::r;
+                    grid_[l][c].clock = 0;
+                }
+                else {
+                    ++grid_[l][c].clock;
+                    temp[l - 1][c - 1] = Sir::q;
+                }
+                break;
+            case Sir::q_edge:
+                if (day_ < quarantin_.last_day) {
+                    temp[l - 1][c - 1] = Sir::q_edge;
+                }
+                break;
+            default: throw std::runtime_error("ERROR.\n");
             }
         }
         counter_.num_s += std::count(temp[l - 1].begin(), temp[l - 1].end(), Sir::s);
@@ -131,21 +131,23 @@ void sir::Board::evolve_() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int sir::Board::gen_unif_rand_number(int num) const{
+    int x;
     std::random_device dev{};
     std::mt19937 gen{ dev() };
     std::uniform_int_distribution<int> uniform(0, num);
-    return uniform(gen);
+    x = uniform(gen);
+    return x;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void sir::Board::copy_(std::vector<std::vector<Sir>>& copy) {
-    for (int l = 1; l <= dimension_ - 1; ++l) {
+    for (int l = 0; l <= dimension_ - 1; ++l) {
         for (int c = 0; c <= dimension_ - 1; ++c) {
             if (l == 0 || c == 0 || l == dimension_ - 1 || c == dimension_ - 1)
             {
-                grid_[l][c].state = Sir::q;
+                grid_[l][c].state = Sir::s;
             }
             else {
                 grid_[l][c].state = copy[l - 1][c - 1];
@@ -198,8 +200,8 @@ void sir::Board::quarantine_() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void sir::Board::move_() {
-    for (int l = 1; l < dimension_ - 2; ++l) {
-        for (int c = 1; c < dimension_ - 2; ++c) {
+    for (int l = 2; l < dimension_ - 2; ++l) {
+        for (int c = 2; c < dimension_ - 2; ++c) {
             if (grid_[l][c].state != Sir::q && grid_[l][c].state != Sir::q_edge) {
                 int swap; 
                 int newc, newl; 
@@ -459,3 +461,5 @@ void sir::Board::draw(int& millisecondi) {
         
     }
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
