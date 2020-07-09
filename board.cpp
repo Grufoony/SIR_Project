@@ -88,7 +88,7 @@ void sir::Board::evolve_() {
                 else {
                     grid_[l][c].clock += 1;
            
-                    if (n<theoretical_ill*gamma_) {//grid_[l][c].clock >theoretical_ill*gamma_
+                    if (n<theoretical_ill*gamma_) {
                         ++(++temp[l - 1][c - 1]);
                         grid_[l][c].clock = 0;
                     }
