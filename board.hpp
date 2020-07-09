@@ -1,5 +1,5 @@
 #ifndef BOARD_HPP
-#define Board_HPP
+#define BOARD_HPP
 #include "structures.hpp"
 #include <iostream>
 #include <vector>
@@ -24,7 +24,7 @@ public:
   Board(std::string c, int n, double b, double y, int inf, Mode adv_opt,
         double q_prob, Quarantine_parameters quarantine);
   void copy_(std::vector<std::vector<Sir>> &end);
-  void counter_quarantene_infected();
+  void counter_quarantine_infected();
   Sir &operator()(int riga, int colonna);
   void move_();
   void evolve_();

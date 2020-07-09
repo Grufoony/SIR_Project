@@ -11,12 +11,19 @@
 sir::Board::Board(std::string c, int n, double b, double y, int inf,
                   Mode adv_opt, double q_prob, Quarantine_parameters quarantine)
     : grid_(n + 2, std::vector<Cell>(n + 2)) {
+  dimension_ = n + 2;
+  q_prob_ = q_prob;
+  beta_ = b;
+  gamma_ = y;
+  day_ = 0;
+  name_ = c;
+  advanced_opt_ = adv_opt;
   if (n < 149 || n > 601) {
     throw std::runtime_error{
         "Error: the dimension is too tiny to see any simulation effect."
         "The minimum dimension is 150.The maximum is 600"};
   }
-  if ((int)advanced_opt_ >= 4)
+  if ((int)advanced_opt_ > 3)
     assert(quarantine.first_day != 0 && quarantine.last_day != 0);
   if ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)
     assert(static_cast<int>(q_prob_ * 1000) != 0);
@@ -24,17 +31,9 @@ sir::Board::Board(std::string c, int n, double b, double y, int inf,
   assert(y > 0 && y < 1);
   assert(q_prob >= 0 && q_prob <= 1);
   assert(inf > 0);
-
-  dimension_ = n + 2;
-  q_prob_ = q_prob;
-  beta_ = b;
-  gamma_ = y;
-  advanced_opt_ = adv_opt;
-  day_ = 0;
-  name_ = c;
   for (int i = 0; i < inf; ++i) {
-    int ran1 = (std::rand() + time(0)) % dimension_;
-    int ran2 = (std::rand() + time(0)) % dimension_;
+    int ran1 = (std::rand() + time(nullptr)) % dimension_;
+    int ran2 = (std::rand() + time(nullptr)) % dimension_;
     grid_[ran1][ran2].state = Sir::i;
   }
   quarantin_.len_line = dimension_ / 2;
@@ -129,7 +128,7 @@ void sir::Board::evolve_() {
     counter_.num_q +=
         std::count(temp[l - 1].begin(), temp[l - 1].end(), Sir::q);
   }
-  counter_quarantene_infected();
+  counter_quarantine_infected();
   ++day_;
   copy_(temp);
 }
@@ -140,7 +139,7 @@ void sir::Board::evolve_() {
 int sir::Board::gen_unif_rand_number(int num) const {
   std::random_device dev{};
   std::mt19937 gen{dev()};
-  gen.seed(rand() + time(0));
+  gen.seed(rand() + time(nullptr));
   std::uniform_int_distribution<int> uniform(0, num);
   return uniform(gen);
 }
@@ -163,16 +162,16 @@ void sir::Board::copy_(std::vector<std::vector<Sir>> &copy) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void sir::Board::counter_quarantene_infected() {
+void sir::Board::counter_quarantine_infected() {
   q_counter_.num_s = 0;
   q_counter_.num_i = 0;
   q_counter_.num_r = 0;
   for (int line = quarantin_.len_line; line < quarantin_.len_line * 2; ++line) {
-    for (int colon = quarantin_.len_line; colon < quarantin_.len_line * 2;
-         ++colon) {
-      if (grid_[line][colon].state == Sir::s) {
+    for (int column = quarantin_.len_line; column < quarantin_.len_line * 2;
+         ++column) {
+      if (grid_[line][column].state == Sir::s) {
         ++q_counter_.num_s;
-      } else if (grid_[line][colon].state == Sir::r) {
+      } else if (grid_[line][column].state == Sir::r) {
         ++q_counter_.num_r;
       } else {
         ++q_counter_.num_i;
@@ -206,8 +205,9 @@ void sir::Board::move_() {
     for (int c = 2; c < dimension_ - 2; ++c) {
       if (grid_[l][c].state != Sir::q && grid_[l][c].state != Sir::q_edge) {
         int swap;
-        int newc, newl;
-        swap = (rand() + time(0)) % 13;
+        int newc = 0;
+        int newl = 0;
+        swap = (rand() + time(nullptr)) % 13;
         switch (swap) {
         case 0:
           newc = c - 1;
@@ -266,8 +266,8 @@ void sir::Board::airplane_() {
       for (int c = 1; c < dimension_; ++c) {
         if (((l < quarantin_.len_line || l > quarantin_.len_line * 2) ||
              (c < quarantin_.len_line || c > quarantin_.len_line * 2))) {
-          int column = (rand() + time(0)) % (dimension_);
-          int line = (rand() + time(0)) % (dimension_);
+          int column = (rand() + time(nullptr)) % (dimension_);
+          int line = (rand() + time(nullptr)) % (dimension_);
           if (((grid_[l][c].state != Sir::q_edge &&
                 grid_[column][line].state != Sir::q_edge) ||
                (grid_[l][c].state != Sir::q &&
@@ -285,8 +285,8 @@ void sir::Board::airplane_() {
   } else {
     for (int l = 1; l < dimension_; ++l) {
       for (int c = 1; c < dimension_; ++c) {
-        int column = (rand() + time(0)) % (dimension_);
-        int line = (rand() + time(0)) % (dimension_);
+        int column = (rand() + time(nullptr)) % (dimension_);
+        int line = (rand() + time(nullptr)) % (dimension_);
         if (grid_[l][c].state != Sir::q_edge &&
             grid_[column][line].state != Sir::q_edge) {
           if (line == 1) {

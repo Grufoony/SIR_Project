@@ -1,4 +1,4 @@
-#ifndef DiSEASE_HPP
+#ifndef DISEASE_HPP
 #define DISEASE_HPP
 
 #include <cassert>
@@ -24,7 +24,7 @@ private:
   double beta_;
 
 public:
-  auto evolve_(State const &begin);
+  State evolve_(State const &begin);
   Disease(std::string p, int n, double b, double y);
   void setBeta(double b);
   void setGamma(double g);
