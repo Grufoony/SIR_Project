@@ -1,41 +1,46 @@
-#include"board.hpp"
-#include<cassert>
-#include<random>
-#include<ctime>
+#include "board.hpp"
+#include <cassert>
+#include <random>
+#include <ctime>
 #include <thread>
-#include<chrono>
-#include<stdexcept>
+#include <chrono>
+#include <stdexcept>
+#include <algorithm>
 #include <SFML/Graphics.hpp>
-#include<algorithm>
-#include<cmath>
 
 // q_prob_ è la probabilità che lo stato trovi un malato e lo metta in quarantena 
- sir::Board::Board(std::string c, int n, double b, double y, int inf, Mode adv_opt, double q_prob, Quarantine_parameters quarantine) :
-    grid_(n + 2, std::vector<Cell>(n + 2)), dimension_{ n + 2 }, q_prob_{ q_prob },
-     beta_{ b }, gamma_{ y }, advanced_opt_{ adv_opt }, name_{ c }, day_{ 0 }{
-    //Verifico la coerenza dei dati
-    if (n < 149  || n>401) {
-        throw std::runtime_error{ "Error: the dimension is too tiny to see any simulation effect."
-            "The minimum dimension is 100" };
-    }
-    if ((int)advanced_opt_ >= 4)
-        assert(quarantine.first_day != 0 && quarantine.last_day != 0);
-    if ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)
-        assert(static_cast<int>(q_prob_ * 1000) != 0);
-    assert(b > 0 && b < 1);
-    assert(y > 0 && y < 1);
-    assert(q_prob >= 0 && q_prob <= 1);
-    assert(inf > 0);
-    for (int i = 0; i < inf; ++i) {
-        int ran1 = gen_unif_rand_number(dimension_-1);
-        int ran2 = gen_unif_rand_number(dimension_-1);
-        grid_[ran1][ran2].state = Sir::i;
-    }
-    quarantin_.len_line = dimension_ / 2;
-    quarantin_.first_day = quarantine.first_day;
-    quarantin_.last_day = quarantine.last_day;
-    counter_.num_i = inf;
-};
+    sir::Board::Board(std::string c, int n, double b, double y, int inf, Mode adv_opt, double q_prob, Quarantine_parameters quarantine) : grid_(n + 2, std::vector<Cell>(n + 2)) {
+        //Verifico la coerenza dei dati
+        if (n < 149  || n>401) {
+            throw std::runtime_error{ "Error: the dimension is too tiny to see any simulation effect."
+                "The minimum dimension is 150" };
+        }
+        if ((int)advanced_opt_ >= 4)
+            assert(quarantine.first_day != 0 && quarantine.last_day != 0);
+        if ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)
+            assert(static_cast<int>(q_prob_ * 1000) != 0);
+        assert(b > 0 && b < 1);
+        assert(y > 0 && y < 1);
+        assert(q_prob >= 0 && q_prob <= 1);
+        assert(inf > 0);
+        //Inizializzazione dopo gli assert
+        dimension_ = n + 2;
+        q_prob_ = q_prob;
+        beta_ = b;
+        gamma_ = y;
+        advanced_opt_ = adv_opt;
+        day_ = 0;
+        name_ = c;
+        for (int i = 0; i < inf; ++i) {
+            int ran1 = gen_unif_rand_number(dimension_-1);
+            int ran2 = gen_unif_rand_number(dimension_-1);
+            grid_[ran1][ran2].state = Sir::i;
+        }
+        quarantin_.len_line = dimension_ / 2;
+        quarantin_.first_day = quarantine.first_day;
+        quarantin_.last_day = quarantine.last_day;
+        counter_.num_i = inf;
+    };
     Sir& sir::Board::operator()(int riga, int column) {
         return (grid_[riga + 1][column + 1].state);
     }
@@ -66,7 +71,7 @@
                     if (grid_[l][c].inf_prob >= 1) {
                         ++grid_support[l - 1][c - 1];
                         grid_[l][c].inf_prob = 0;
-                        ///counter = 0;
+                        //counter = 0;
                     }
                     else {
                         grid_support[l - 1][c - 1]=Sir::s;
@@ -303,25 +308,28 @@
                 for (int l = 1; l < dimension_ - 1; ++l) {
                     for (int c = 1; c < dimension_ - 1; ++c) {
                         //Stampa le celle
-                        if (grid_[l][c].state == Sir::s) {
-                            sus_bit.setPosition(bit_size * c, bit_size * l);
-                            window.draw(sus_bit);
-                        }
-                        else if (grid_[l][c].state == Sir::i) {
-                            inf_bit.setPosition(bit_size * c, bit_size * l);
-                            window.draw(inf_bit);
-                        }
-                        else if (grid_[l][c].state == Sir::r) {
-                            rec_bit.setPosition(bit_size * c, bit_size * l);
-                            window.draw(rec_bit);
-                        }
-                        else if (grid_[l][c].state == Sir::q_edge) {
-                            board.setPosition(bit_size * c, bit_size * l);
-                            window.draw(board);
-                        }
-                        else if (grid_[l][c].state == Sir::q) {
-                            q_bit.setPosition(bit_size * c, bit_size * l);
-                            window.draw(q_bit);
+                        switch(grid_[l][c].state) {
+                            case Sir::s :
+                                sus_bit.setPosition(bit_size * c, bit_size * l);
+                                window.draw(sus_bit);
+                                break;
+                            case Sir::i :
+                                inf_bit.setPosition(bit_size * c, bit_size * l);
+                                window.draw(inf_bit);
+                                break;
+                            case Sir::r :
+                                rec_bit.setPosition(bit_size * c, bit_size * l);
+                                window.draw(rec_bit);
+                                break;
+                            case Sir::q :
+                                q_bit.setPosition(bit_size * c, bit_size * l);
+                                window.draw(q_bit);
+                                break;
+                            case Sir::q_edge :
+                                board.setPosition(bit_size * c, bit_size * l);
+                                window.draw(board);
+                                break;
+                            default: throw std::runtime_error("WARNING: invalid Sir type in a bit.\n");
                         }
                     }
 
@@ -340,7 +348,7 @@
                         board.setPosition(i * bit_size, static_cast<float>(dimension_ / 2));
                         window.draw(board);
                         // liberi grafico
-                        for (int counter = 0; counter != graph_out_quarantine_.size(); ++counter) {
+                        for (int counter = 0; counter != (int)graph_out_quarantine_.size(); ++counter) {
                             if (graph_out_quarantine_[counter].num_i <= 1) {
                                 inf_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_ / 2) - 3);
                                 window.draw(inf_bit);
@@ -400,7 +408,7 @@
                      graph_points.num_s = static_cast<int>(counter_.num_s / dimension_);
                      graph_points.num_r = static_cast<int>(counter_.num_r / dimension_);
                      graph_out_quarantine_.push_back({graph_points});
-                    for (int counter = 0; counter != graph_out_quarantine_.size(); ++counter) {
+                    for (int counter = 0; counter != (int)graph_out_quarantine_.size(); ++counter) {
                         if (graph_out_quarantine_[counter].num_i <= 1) {
                             inf_bit.setPosition(static_cast<float>(dimension_ + counter), static_cast<float>(dimension_) - 2);
                             window.draw(inf_bit);

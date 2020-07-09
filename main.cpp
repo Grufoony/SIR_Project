@@ -15,7 +15,7 @@ int main() {
         std::string name;
         int option;       
         constexpr int num_initial_infected = 5;
-        constexpr int dim = 200;
+        constexpr int dim = 400;
         constexpr double Beta = 0.2;
         constexpr double Gamma = 0.15;
         double q_prob = 0;
@@ -27,8 +27,7 @@ int main() {
         std::cout << "Welcome to the simulation of an epidemic disease!\n";
         std::cout << "The name of the disease is:";
         std::cin >> name;
-        std::cout << "Choose the mode:\n1) Still \n2) Move\n3) Move Plus\n4) Quarantine 1\n5) Quarantine 2\n"
-            "6) Quarantine 1 and 2\nYour choice: ";
+        std::cout << "Choose the mode:\n1) Still \n2) Move\n3) Move Plus\n4) Quarantine 1\n5) Quarantine 2\n6) Quarantine 1 and 2\nYour choice: ";
         std::cin >> option;
 
         switch (option)
@@ -53,7 +52,7 @@ int main() {
         }
        
         sir::Board b(name, dim, Beta, Gamma, num_initial_infected, adv_opt, q_prob, Quarantine);
-        int refresh_rate = 200; //ms
+        int refresh_rate = 10; //ms
         b.draw(refresh_rate);
 
         /***********************************************************
