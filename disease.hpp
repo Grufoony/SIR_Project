@@ -1,4 +1,3 @@
-
 #ifndef DiSEASE_HPP
 #define DISEASE_HPP
 
@@ -11,7 +10,7 @@
 #include <string>
 #include <limits>
 #include <cmath>
-#include <SFML/Graphics.hpp>
+
 #include "structures.hpp"
 
 namespace disease {
