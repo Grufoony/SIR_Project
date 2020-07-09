@@ -127,6 +127,9 @@ void disease::Disease::draw(int lenght, int height, const char& c) {
 
     //Settiamo ora le variabili per mettere tutto in "scala"
     auto x_up = (lenght - EDGE) / state_.size();
+    if(x_up < 1) {
+        x_up = 1;
+    }
     auto y_scale = (height - (2 * EDGE)) / tot_;
 
     sf::RectangleShape bit(sf::Vector2f(2., 2.));
