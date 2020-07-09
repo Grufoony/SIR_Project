@@ -4,7 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // evolution of the disease
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-auto disease::Disease::evolve_(State const &begin) {
+State disease::Disease::evolve_(State const &begin) {
   auto end = State();
   end.s = begin.s - beta_ * begin.i * begin.s;
   if (end.s < 0) {
@@ -19,9 +19,9 @@ auto disease::Disease::evolve_(State const &begin) {
     end.i = tot_ - end.r - end.s;
   }
   // I make sure the data is correct
-  assert(end.s > 0 || end.s == 0);
-  assert(end.i > 0 || end.i == 0);
-  assert(end.r > 0 || end.r == 0);
+  assert(!(end.s < 0));
+  assert(!(end.i < 0));
+  assert(!(end.r < 0));
   return end;
 };
 

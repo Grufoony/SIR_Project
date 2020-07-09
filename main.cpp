@@ -9,7 +9,7 @@
 
 #include "board.hpp"
 #include "disease.hpp"
-constexpr int NUM_INITIAL_INFECTED = 5;
+constexpr int NUM_INITIAL_INFECTED = 20;
 constexpr int DIM = 400;
 constexpr double BETA = 0.4;
 constexpr double GAMMA = 0.15;
@@ -38,7 +38,6 @@ int main() {
     case 2:
       adv_opt = Mode::Move;
       break;
-      ;
     case 3:
       adv_opt = Mode::Move_Plus;
       break;
@@ -53,7 +52,7 @@ int main() {
       break;
     case 6:
       adv_opt = Mode::Quarantine_1_and_2;
-      q_prob = 0.5;
+      q_prob = 0.09;
       Quarantine.first_day = 10;
       Quarantine.last_day = 150;
       break;
