@@ -15,9 +15,9 @@ int main() {
         std::string name;
         int option;       
         constexpr int num_initial_infected = 5;
-        constexpr int dim = 400;
+        constexpr int dim = 600;
         constexpr double Beta = 0.2;
-        constexpr double Gamma = 0.15;
+        constexpr double Gamma = 0.5;
         double q_prob = 0;
         Mode adv_opt;
         Quarantine_parameters Quarantine;
@@ -36,14 +36,14 @@ int main() {
         case 2:adv_opt = Mode::Move; break;;
         case 3:adv_opt = Mode::Move_Plus; break;
         case 4:adv_opt = Mode::Quarantine_1; 
-            q_prob = 0.4;
+            q_prob = 0.1;
             break;
         case 5:adv_opt = Mode::Quarantine_2; 
             Quarantine.first_day = 10;
             Quarantine.last_day = 150;
             break;
         case 6:adv_opt = Mode::Quarantine_1_and_2; 
-            q_prob = 0.4;
+            q_prob = 0.1;
             Quarantine.first_day = 10;
             Quarantine.last_day = 150;
             break;

@@ -11,7 +11,7 @@
 // q_prob_ è la probabilità che lo stato trovi un malato e lo metta in quarantena 
     sir::Board::Board(std::string c, int n, double b, double y, int inf, Mode adv_opt, double q_prob, Quarantine_parameters quarantine) : grid_(n + 2, std::vector<Cell>(n + 2)) {
         //Verifico la coerenza dei dati
-        if (n < 149  || n>401) {
+        if (n < 149  || n>601) {
             throw std::runtime_error{ "Error: the dimension is too tiny to see any simulation effect."
                 "The minimum dimension is 150" };
         }
@@ -32,8 +32,8 @@
         day_ = 0;
         name_ = c;
         for (int i = 0; i < inf; ++i) {
-            int ran1 = gen_unif_rand_number(dimension_-1);
-            int ran2 = gen_unif_rand_number(dimension_-1);
+            int ran1 = (std::rand() + time(0)) % dimension_;
+            int ran2 = (std::rand() + time(0)) % dimension_;
             grid_[ran1][ran2].state = Sir::i;
         }
         quarantin_.len_line = dimension_ / 2;
@@ -49,7 +49,7 @@
         counter_.num_s = 0;
         counter_.num_r = 0;
         counter_.num_q = 0;
-        std::vector<std::vector<Sir>> grid_support(dimension_ - 2, std::vector<Sir>(dimension_ - 2));
+        std::vector<std::vector<Sir>> temp(dimension_ - 2, std::vector<Sir>(dimension_ - 2));
         int teoretical_ill = static_cast<int>(dimension_ * beta_);
         int malati_trovati = static_cast<int>(teoretical_ill * q_prob_);
         for (int l = 1; l < dimension_ - 1; ++l) {
@@ -58,8 +58,7 @@
                     for (int j = -1; j <= 1; ++j) {
                         for (int i = -1; i <= 1; ++i) {
                             if (grid_[l + j][c + i].state == Sir::i && grid_[l + j][c + i].state != Sir::s) {
-                                //counter += 1;
-                                grid_[l][c].inf_prob +=beta_; //somma delle probabilita di infettarsi attorno alla cella.
+                                grid_[l][c].inf_prob += beta_; //somma delle probabilita di infettarsi attorno alla cella.
                                 //quando tale probabilità diventa uno la cella si ammala
                             }
                             else {
@@ -67,15 +66,12 @@
                             }
                         }
                     }
-                    //grid_[l][c].inf_prob += 1-static_cast<double>(Newton_bin(8,counter) * pow(beta_,counter) * pow((1 - beta_),8-counter));
                     if (grid_[l][c].inf_prob >= 1) {
-                        ++grid_support[l - 1][c - 1];
+                        ++temp[l - 1][c - 1];
                         grid_[l][c].inf_prob = 0;
-                        //counter = 0;
                     }
                     else {
-                        grid_support[l - 1][c - 1]=Sir::s;
-                        //counter = 0;
+                        temp[l - 1][c - 1];
                     }
                 }
                 //metodo di greg corretto: quando una persona è malata o guarisce però dopo 14 giorni ,oppure viene messa in quarantena prima di guarire.
@@ -83,60 +79,52 @@
                 //matati trovati è un numero dipendete da q_prob_ compreso fra zero ed il precedente sup. da qui si comprende l if.
                 // deve introdurre un opzione avanzata il fatto che ci si possa quarantenare. Fusco deve agire qui
                 else if (grid_[l][c].state == Sir::i) {
-                    int n = gen_unif_rand_number(teoretical_ill);
-                    if (n < malati_trovati && day_>15 && ((int)advanced_opt_== 3 || (int)advanced_opt_== 5)) {
-                        grid_support[l - 1][c - 1] = Sir::q;
+                    int n = (rand() + time(0)) % (teoretical_ill);
+                    if (n < malati_trovati && day_>10 && ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)) {
+                        temp[l - 1][c - 1] = Sir::q;
                     }
                     else {
                         grid_[l][c].clock += 1;
                         if (grid_[l][c].clock > 14) {
-                            ++(++grid_support[l - 1][c - 1]);
+                            ++(++temp[l - 1][c - 1]);
                             grid_[l][c].clock = 0;
                         }
                         else {
-                            ++grid_support[l - 1][c - 1];
+                            ++temp[l - 1][c - 1];
                         }
                     }
                 }
                 else if (grid_[l][c].state == Sir::r) {
-                    ++(++grid_support[l - 1][c - 1]);
+                    ++(++temp[l - 1][c - 1]);
                 }
                 //questo if è per l ultima opzione avanzata,dove ho il borod della quarantena.
                 else if (grid_[l][c].state == Sir::q_edge) {
                     if (day_ < quarantin_.last_day)
-                        grid_support[l - 1][c - 1] = Sir::q_edge;
+                        temp[l - 1][c - 1] = Sir::q_edge;
                     else
-                        grid_support[l - 1][c - 1]=Sir::i;
+                        temp[l - 1][c - 1] ;
                 }
                 // quando un malatom viene trovato malato viene messo in quarantena. Ci sta per 40 giorni poi è libero. dve essere un opzione avanzata di fusco.
                 else if (grid_[l][c].state == Sir::q) {
                     if (grid_[l][c].clock == 40) {
-                        grid_support[l - 1][c - 1] = Sir::r;
+                        temp[l - 1][c - 1] = Sir::r;
                         grid_[l][c].clock = 0;
                     }
                     else {
                         ++grid_[l][c].clock;
-                        grid_support[l - 1][c - 1] = Sir::q;
+                        temp[l - 1][c - 1] = Sir::q;
                     }
                 }
 
             }
-            counter_.num_s += std::count(grid_support[l - 1].begin(), grid_support[l - 1].end(), Sir::s);
-            counter_.num_i += std::count(grid_support[l - 1].begin(), grid_support[l - 1].end(), Sir::i);
-            counter_.num_r += std::count(grid_support[l - 1].begin(), grid_support[l - 1].end(), Sir::r);
-            counter_.num_q += std::count(grid_support[l - 1].begin(),grid_support[l - 1].end(), Sir::q);
+            counter_.num_s += std::count(temp[l - 1].begin(), temp[l - 1].end(), Sir::s);
+            counter_.num_i += std::count(temp[l - 1].begin(), temp[l - 1].end(), Sir::i);
+            counter_.num_r += std::count(temp[l - 1].begin(), temp[l - 1].end(), Sir::r);
+            counter_.num_q += std::count(temp[l - 1].begin(),temp[l - 1].end(), Sir::q);
         }
         counter_quarantene_infected();
         ++day_;
-        copy_(grid_support);
-    }
-    int sir::Board::gen_unif_rand_number(int num) const{
-        int x;
-        std::random_device dev{};
-        std::mt19937 gen{ dev() };
-        std::uniform_int_distribution<int> dis(0, num);
-        x = dis(gen);
-        return x;
+        copy_(temp);
     }
     void sir::Board::counter_quarantene_infected() {
         q_counter_.num_s = 0;
@@ -157,7 +145,7 @@
         }
     }
     // funzione che definisce una sola volta i bordi per la quarantena.
-//LI dichiara visibili in modo tale che draw stampi il bordo nero dell'opzione di pivi.
+    //LI dichiara visibili in modo tale che draw stampi il bordo nero dell'opzione di pivi.
     void sir::Board::quarantine_() {
         for (int l = 1; l < dimension_; ++l) {
             for (int c = 1; c < dimension_; ++c) {
@@ -177,7 +165,7 @@
                 if (grid_[l][c].state != Sir::q && grid_[l][c].state != Sir::q_edge) {
                     int swap; // indicatore, se ha valore da 0 a 7 fa scambiare la cella con una delle 8 adiacenti
                     int newc, newl; //indici della cella da scambiare
-                    swap = gen_unif_rand_number(13); //probabilità di circa il 60% che si sposti
+                    swap = (rand() + time(0)) % 13; //probabilità di circa il 60% che si sposti
                     switch (swap) {
                     case 0: newc = c - 1;   newl = l - 1;   break;
                     case 1: newc = c;       newl = l - 1;   break;
@@ -203,8 +191,8 @@
             for (int l = 1; l < dimension_; ++l) {
                 for (int c = 1; c < dimension_; ++c) {
                     if (((l < quarantin_.len_line || l > quarantin_.len_line * 2) || (c < quarantin_.len_line || c > quarantin_.len_line * 2))) {
-                        int column = gen_unif_rand_number(dimension_ - 1);
-                        int line = gen_unif_rand_number(dimension_ - 1);
+                        int column = (rand() + time(0)) % (dimension_ - 1);
+                        int line = (rand() + time(0)) % (dimension_ - 1);
                         // ci ho messo 3 ore per fare questo if. Non toccatelo please ve lo spiego in chiamata.
                         if (((grid_[l][c].state != Sir::q_edge && grid_[column][line].state != Sir::q_edge) ||
                             (grid_[l][c].state != Sir::q && grid_[column][line].state != Sir::q))
@@ -222,8 +210,8 @@
         else {
             for (int l = 1; l < dimension_; ++l) {
                 for (int c = 1; c < dimension_; ++c) {
-                    int column = gen_unif_rand_number(dimension_ - 1);
-                    int line = gen_unif_rand_number(dimension_ - 1);
+                    int column = (rand() + time(0)) % (dimension_ - 1);
+                    int line = (rand() + time(0)) % (dimension_ - 1);
                     if (grid_[l][c].state != Sir::q_edge && grid_[column][line].state != Sir::q_edge) {
                         if (line == 1) {
                             std::swap(grid_[l][c], grid_[line][column]);

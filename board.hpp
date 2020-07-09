@@ -29,7 +29,6 @@ namespace sir {
         void quarantine_();
         void airplane_();
         void draw(int& secondi);
-        int& gen_unif_rand_number(int num) const;
     };
 }
 #endif 
