@@ -353,7 +353,7 @@ void sir::Board::draw(int& milliseconds) {
             }
 
         }
-        if (day_ >= 400) {
+        if (day_ >= 300) {
             window.close();
         }
         std::cout << "" << day_ + 1 << "            "
