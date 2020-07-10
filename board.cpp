@@ -143,7 +143,7 @@ void sir::Board::evolve_() {
 int sir::Board::gen_unif_rand_number(int num) const {
     std::random_device dev{};
     std::mt19937 gen{ dev() };
-    //gen.seed(rand() + time(nullptr));
+    gen.seed(rand() + time(nullptr));
     std::uniform_int_distribution<int> uniform(0, num);
     return uniform(gen);
 }
