@@ -38,7 +38,6 @@ int main() {
         case 2:
             adv_opt = Mode::Move;
             break;
-            ;
         case 3:
             adv_opt = Mode::Move_Plus;
             break;
