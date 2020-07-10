@@ -1,43 +1,52 @@
 #ifndef DISEASE_HPP
 #define DISEASE_HPP
 
-#include <cassert>
-#include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <limits>
-#include <stdexcept>
-#include <string>
 #include <vector>
 
 #include "structures.hpp"
 
 namespace disease {
-int constexpr EDGE = 20;
-class Disease {
-private:
-  std::string name_;
-  std::vector<State> state_;
-  double tot_;
-  double gamma_;
-  double beta_;
+    int constexpr EDGE = 20;
+    class Disease {
+    private:
+        std::string name_;
+        std::vector<State> state_;
+        double tot_;
+        double gamma_;
+        double beta_;
 
-public:
-  State evolve_(State const &begin);
-  Disease(std::string p, int n, double b, double y);
-  void setBeta(double b);
-  void setGamma(double g);
-  void evolve(int n);
-  void print();
-  void f_print();
-  double get_state_s(int i);
-  double get_state_i(int i);
-  double get_state_r(int i);
-  double get_beta();
-  double get_gamma();
-  void draw(int lenght, int height, const char &c);
-};
-} // namespace disease
+    public:
+        Disease(std::string p, int n, double b, double y);
+
+        //////////////////////////////////////////////////////////////////////////////////
+        State evolve_(
+            State const& begin);  // It evolves the State of the private vector.
+        //////////////////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////////////////
+        void setBeta(double b);  // Set beta of the class.
+        //////////////////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////////////////
+        void setGamma(double g);  // Set gamma of the class.
+        //////////////////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////////////////
+        void evolve(int n);  // It evolves and pushes back day by day the state_ .
+        //////////////////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////////////////
+        void print();  // It prints the table on the console.
+        //////////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        void f_print();  // It prints the table on file.
+        ///////////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        void draw(int lenght, int height,const char& c);  // It draws the graph using SFML.
+        ///////////////////////////////////////////////////////////////////////////////////
+    };
+}  // namespace disease
 
 #endif
