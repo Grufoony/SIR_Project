@@ -1,37 +1,66 @@
 #ifndef BOARD_HPP
-#define BOARD_HPP
-#include "structures.hpp"
+#define Board_HPP
 #include <iostream>
 #include <vector>
-namespace sir {
-class Board {
-private:
-  std::string name_;
-  std::vector<std::vector<Cell>> grid_;
-  int dimension_;
-  double beta_;
-  double gamma_;
-  int day_ = 0;
-  Counter counter_;
-  Counter q_counter_;
-  double q_prob_;
-  Mode advanced_opt_;
-  Quarantine_parameters quarantin_;
-  std::vector<Counter> graph_out_quarantine_;
-  std::vector<Counter> graph_in_quarantine_;
 
-public:
-  Board(std::string c, int n, double b, double y, int inf, Mode adv_opt,
-        double q_prob, Quarantine_parameters quarantine);
-  void copy_(std::vector<std::vector<Sir>> &end);
-  void counter_quarantine();
-  Sir &operator()(int riga, int colonna);
-  void move_();
-  void evolve_();
-  void quarantine_();
-  void airplane_();
-  void draw(int &secondi);
-  int gen_unif_rand_number(int) const;
-};
-} // namespace sir
+#include "structures.hpp"
+namespace sir {
+    class Board {
+    private:
+        std::string name_;
+        std::vector<std::vector<Cell>> grid_;
+        int dimension_;
+        double beta_;
+        double gamma_;
+        int day_ = 0;
+        Counter counter_;
+        Counter q_counter_;
+        double q_prob_;
+        Mode advanced_opt_;
+        Quarantine_parameters quarantin_;
+        std::vector<Counter> graph_out_quarantine_;
+        std::vector<Counter> graph_in_quarantine_;
+
+    public:
+       
+        Board(std::string c, int n, double b, double y, int inf, Mode adv_opt,
+            double q_prob, Quarantine_parameters quarantine);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        void copy_(std::vector<std::vector<Sir>>& end);   //Copy a Sir vector in the grid_ vector
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        void counter_quarantine();  //It counts the number of s,i,r,q in the quarantined quarter.
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        Sir& operator()(int riga, int colonna);  //Initialize as infected one element of the grid.
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        void move_();   //Short distance movement.
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        void evolve_();  //Evolution of the grid.
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        void quarantine_();  //Activates the quarantine in a quarter of the grid.
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        void airplane_();   //Long distance movement.
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        void draw(int& secondi);   //It prints using SFML.  
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        int gen_unif_rand_number(int) const;  //It generates a uniformly distribuited number.
+        ///////////////////////////////////////////////////////////////////////////////////////////
+    };
+}  // namespace sir
 #endif
