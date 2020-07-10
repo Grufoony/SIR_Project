@@ -1,10 +1,8 @@
 //*******************************************************************************************
-// Autori : Francesco Pivi , Gregorio Berselli, Matteo Fusconi.
 //
+//  Simulation of an epidemic disease
+//  Authors : Francesco Pivi , Gregorio Berselli, Matteo Fusconi.
 //
-// Questo programma illustra l'evoluzione di una ipotetica pandemia secondo
-// il modello Sir. Tale modello è stato poi implementato con quarantenati ed
-// altre modalità descritte nella relazione allegata.
 //*******************************************************************************************
 
 #include "board.hpp"
@@ -65,10 +63,6 @@ int main() {
         int refresh_rate = 10;  // ms
         b.draw(refresh_rate);
 
-        /***********************************************************
-        Di seguito è riportata l'opzione 1 richiesta per l'esame.
-        Si è deciso di utilizzarla per portare un confronto teorico.
-        ***********************************************************/
 
         int days = 1600;
         disease::Disease d(name, DIM * DIM, BETA, GAMMA);
