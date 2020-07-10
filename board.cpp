@@ -91,8 +91,7 @@ void sir::Board::evolve_() {
                 }
                 else {
                     grid_[l][c].clock += 1;
-
-                    if (n < theoretical_ill * gamma_) {
+                    if (n < theoretical_ill * gamma_ && day_>14) {
                         ++(++temp[l - 1][c - 1]);
                         grid_[l][c].clock = 0;
                     }
@@ -105,7 +104,8 @@ void sir::Board::evolve_() {
                 ++(++temp[l - 1][c - 1]);
                 break;
             case Sir::q:
-                if (grid_[l][c].clock == 40) {
+
+                if (grid_[l][c].clock > 40) {
                     temp[l - 1][c - 1] = Sir::r;
                     grid_[l][c].clock = 0;
                 }
@@ -353,7 +353,7 @@ void sir::Board::draw(int& milliseconds) {
             }
 
         }
-        if (day_ >= 250) {
+        if (day_ >= 400) {
             window.close();
         }
         std::cout << "" << day_ + 1 << "            "
