@@ -1,3 +1,4 @@
+#include "board.hpp"
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <cassert>
@@ -7,17 +8,22 @@
 #include <stdexcept>
 #include <thread>
 
-#include "board.hpp"
-
 sir::Board::Board(std::string c, int n, double b, double y, int inf,
     Mode adv_opt, double q_prob, Quarantine_parameters quarantine)
-    : grid_(n + 2, std::vector<Cell>(n + 2)), name_{c} {
+    : grid_(n + 2, std::vector<Cell>(n + 2)) {
+    dimension_ = n + 2;
+    q_prob_ = q_prob;
+    beta_ = b;
+    gamma_ = y;
+    day_ = 0;
+    name_ = c;
+    advanced_opt_ = adv_opt;
     if (n < 149 || n > 601) {
         throw std::runtime_error{
             "Error: the dimension is too tiny to see any simulation effect."
-            "The minimum dimension is 150.The maximum is 400" };
+            "The minimum dimension is 150.The maximum is 600" };
     }
-    if ((int)advanced_opt_ >= 4)
+    if ((int)advanced_opt_ > 3)
         assert(quarantine.first_day != 0 && quarantine.last_day != 0);
     if ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)
         assert(static_cast<int>(q_prob_ * 1000) != 0);
@@ -25,16 +31,9 @@ sir::Board::Board(std::string c, int n, double b, double y, int inf,
     assert(y > 0 && y < 1);
     assert(q_prob >= 0 && q_prob <= 1);
     assert(inf > 0);
-
-    dimension_ = n + 2;
-    q_prob_ = q_prob;
-    beta_ = b;
-    gamma_ = y;
-    advanced_opt_ = adv_opt;
-    day_ = 0;
     for (int i = 0; i < inf; ++i) {
-        int ran1 = (std::rand() + time(0)) % dimension_;
-        int ran2 = (std::rand() + time(0)) % dimension_;
+        int ran1 = (std::rand() + time(nullptr)) % dimension_;
+        int ran2 = (std::rand() + time(nullptr)) % dimension_;
         grid_[ran1][ran2].state = Sir::i;
     }
     quarantin_.len_line = dimension_ / 2;
@@ -92,7 +91,8 @@ void sir::Board::evolve_() {
                 }
                 else {
                     grid_[l][c].clock += 1;
-                    if (n < theoretical_ill * gamma_ && day_>15) {
+
+                    if (n < theoretical_ill * gamma_) {
                         ++(++temp[l - 1][c - 1]);
                         grid_[l][c].clock = 0;
                     }
@@ -105,7 +105,7 @@ void sir::Board::evolve_() {
                 ++(++temp[l - 1][c - 1]);
                 break;
             case Sir::q:
-                if (grid_[l][c].clock > 40) {
+                if (grid_[l][c].clock == 40) {
                     temp[l - 1][c - 1] = Sir::r;
                     grid_[l][c].clock = 0;
                 }
@@ -120,7 +120,7 @@ void sir::Board::evolve_() {
                 }
                 break;
             default:
-                throw std::runtime_error("ERROR.\n");
+                throw std::runtime_error("ERROR: undefined Sir state of a cell.\n");
             }
         }
         counter_.num_s +=
@@ -142,7 +142,8 @@ void sir::Board::evolve_() {
 
 int sir::Board::gen_unif_rand_number(int num) const {
     std::random_device dev{};
-    std::mt19937 gen{dev()};
+    std::mt19937 gen{ dev() };
+    //gen.seed(rand() + time(nullptr));
     std::uniform_int_distribution<int> uniform(0, num);
     return uniform(gen);
 }
@@ -186,9 +187,9 @@ void sir::Board::counter_quarantine() {
     }
 }
 
-/*//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   Activates the quarantine in a quarter of the grid. 
-*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// This member function activates the quarantene of Grid's quarter.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void sir::Board::quarantine_() {
     for (int l = 1; l < dimension_; ++l) {
@@ -203,16 +204,17 @@ void sir::Board::quarantine_() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// short range movement
+// Short range movement
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void sir::Board::move_() {
     for (int l = 2; l < dimension_ - 2; ++l) {
         for (int c = 2; c < dimension_ - 2; ++c) {
             if (grid_[l][c].state != Sir::q && grid_[l][c].state != Sir::q_edge) {
-                int swap = 0;
-                int newc = 0, newl = 0;
-                swap = (rand() + time(0)) % 13;
+                int swap;
+                int newc = 0;
+                int newl = 0;
+                swap = (rand() + time(nullptr)) % 13;
                 switch (swap) {
                 case 0:
                     newc = c - 1;
@@ -271,8 +273,8 @@ void sir::Board::airplane_() {
             for (int c = 1; c < dimension_; ++c) {
                 if (((l < quarantin_.len_line || l > quarantin_.len_line * 2) ||
                     (c < quarantin_.len_line || c > quarantin_.len_line * 2))) {
-                    int column = (rand() + time(0)) % (dimension_);
-                    int line = (rand() + time(0)) % (dimension_);
+                    int column = (rand() + time(nullptr)) % (dimension_);
+                    int line = (rand() + time(nullptr)) % (dimension_);
                     if (((grid_[l][c].state != Sir::q_edge &&
                         grid_[column][line].state != Sir::q_edge) ||
                         (grid_[l][c].state != Sir::q &&
@@ -291,8 +293,8 @@ void sir::Board::airplane_() {
     else {
         for (int l = 1; l < dimension_; ++l) {
             for (int c = 1; c < dimension_; ++c) {
-                int column = (rand() + time(0)) % (dimension_);
-                int line = (rand() + time(0)) % (dimension_);
+                int column = (rand() + time(nullptr)) % (dimension_);
+                int line = (rand() + time(nullptr)) % (dimension_);
                 if (grid_[l][c].state != Sir::q_edge &&
                     grid_[column][line].state != Sir::q_edge) {
                     if (line == 1) {
@@ -304,11 +306,12 @@ void sir::Board::airplane_() {
     }
 }
 
-/*//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    This member function activates SFML graphics.
-*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//  This member function activates SFML graphics.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void sir::Board::draw(int& millisecondi) {
+
+void sir::Board::draw(int& milliseconds) {
     float bit_size = 1.;
     if (dimension_ < 350) {
         bit_size = 2.;
@@ -365,7 +368,7 @@ void sir::Board::draw(int& millisecondi) {
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Here I print the Grid.
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        std::this_thread::sleep_for(std::chrono::milliseconds(millisecondi));
+        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
         for (int l = 1; l < dimension_ - 1; ++l) {
             for (int c = 1; c < dimension_ - 1; ++c) {
                 switch (grid_[l][c].state) {
