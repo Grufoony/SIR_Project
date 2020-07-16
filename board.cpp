@@ -23,9 +23,9 @@ sir::Board::Board(std::string c, int n, double b, double y, int inf,
             "Error: the dimension is too tiny to see any simulation effect."
             "The minimum dimension is 150.The maximum is 600" };
     }
-    if ((int)advanced_opt_ > 3)
+    if (static_cast<int>(advanced_opt_) > 3)
         assert(quarantine.first_day != 0 && quarantine.last_day != 0);
-    if ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)
+    if (static_cast<int>(advanced_opt_) == 3 || static_cast<int>(advanced_opt_) == 5)
         assert(static_cast<int>(q_prob_ * 1000) != 0);
     assert(b > 0 && b < 1);
     assert(y > 0 && y < 1);
@@ -86,7 +86,7 @@ void sir::Board::evolve_() {
             case Sir::i:
                 n = gen_unif_rand_number(theoretical_ill);
                 if (n < ill_found && day_ > 10 &&
-                    ((int)advanced_opt_ == 3 || (int)advanced_opt_ == 5)) {
+                    (static_cast<int>(advanced_opt_) == 3 || static_cast<int>(advanced_opt_) == 5)) {
                     temp[l - 1][c - 1] = Sir::q;
                 }
                 else {
@@ -268,7 +268,7 @@ void sir::Board::move_() {
 
 void sir::Board::airplane_() {
     if (day_ > quarantin_.first_day && day_ < quarantin_.last_day &&
-        (int)advanced_opt_ >= 4) {
+        static_cast<int>(advanced_opt_) >= 4) {
         for (int l = 1; l < dimension_; ++l) {
             for (int c = 1; c < dimension_; ++c) {
                 if (((l < quarantin_.len_line || l > quarantin_.len_line * 2) ||
@@ -342,7 +342,7 @@ void sir::Board::draw(int& milliseconds) {
         << "number_infected" << '\n';
     bool flag = true;
     while (window.isOpen()) {
-        if (day_ >= quarantin_.first_day && flag && (int)advanced_opt_ >= 4) {
+        if (day_ >= quarantin_.first_day && flag && static_cast<int>(advanced_opt_) >= 4) {
             quarantine_();
             flag = false;
         }
@@ -359,10 +359,10 @@ void sir::Board::draw(int& milliseconds) {
         std::cout << "" << day_ + 1 << "            "
             << counter_.num_i + q_counter_.num_i << '\n';
         evolve_();
-        if ((int)advanced_opt_ >= 1) {
+        if (static_cast<int>(advanced_opt_) >= 1) {
             move_();
         }
-        if ((int)advanced_opt_ >= 2) {
+        if (static_cast<int>(advanced_opt_) >= 2) {
             airplane_();
         }
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -402,7 +402,7 @@ void sir::Board::draw(int& milliseconds) {
         // Here I print the graphs.
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        if ((int)advanced_opt_ >= 4) {
+        if (static_cast<int>(advanced_opt_) >= 4) {
             q_graph_points.num_s =
                 static_cast<int>(q_counter_.num_s / (quarantin_.len_line));
             q_graph_points.num_i =
@@ -425,7 +425,7 @@ void sir::Board::draw(int& milliseconds) {
                 board.setPosition(i * bit_size,
                     bit_size * static_cast<float>(dimension_ / 2));
                 window.draw(board);
-                for (int counter = 0; counter != (int)graph_out_quarantine_.size();
+                for (int counter = 0; counter != static_cast<int>(graph_out_quarantine_.size());
                     ++counter) {
                     if (graph_out_quarantine_[counter].num_i <= 1) {
                         inf_bit.setPosition(
@@ -523,7 +523,7 @@ void sir::Board::draw(int& milliseconds) {
             graph_points.num_s = static_cast<int>(counter_.num_s / dimension_);
             graph_points.num_r = static_cast<int>(counter_.num_r / dimension_);
             graph_out_quarantine_.push_back({ graph_points });
-            for (int counter = 0; counter != (int)graph_out_quarantine_.size();
+            for (int counter = 0; counter != static_cast<int>(graph_out_quarantine_.size());
                 ++counter) {
                 if (graph_out_quarantine_[counter].num_i <= 1) {
                     inf_bit.setPosition(
