@@ -29,6 +29,10 @@ struct Cell {
     inf_prob = 0;
     clock = 0;
   }
+  Cell& operator=(const Sir& newstate) {
+    this->state = newstate;
+    return *this;
+  }
 };
 
 //////////////////////////////////////////////////////

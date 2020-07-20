@@ -44,7 +44,7 @@ disease::Disease::Disease(std::string p, int n, double b, double y) : name_{p} {
   tot_ = n;
   beta_ = b / tot_;
   gamma_ = y * 0.1;
-  State state_0{static_cast<double>(n - 1), 1., 0.};
+  State state_0{(double)n - 1., 1., 0.};
   state_.push_back(state_0);
 }
 
@@ -70,8 +70,8 @@ void disease::Disease::print() {
   std::cout << tab << "Day" << tab << "Susceptible" << tab << "Infectuos" << tab
             << "Recovered" << '\n';
   for (auto const it : state_) {
-    std::cout << std::setprecision(10) << tab << i << tab << static_cast<int>(it.s) << tab
-              << static_cast<int>(it.i) << tab << static_cast<int>(it.r) << '\n';
+    std::cout << std::setprecision(10) << tab << i << tab << (int)it.s << tab
+              << (int)it.i << tab << (int)it.r << '\n';
     ++i;
   }
 }
